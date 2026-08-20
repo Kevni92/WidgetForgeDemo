@@ -32,4 +32,5 @@ npm-debug.log*
 
 # Temporary
 .tmp/
+e2e/.tmp/
 tmp/

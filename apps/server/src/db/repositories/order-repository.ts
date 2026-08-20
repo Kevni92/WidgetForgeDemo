@@ -53,7 +53,7 @@ export class OrderRepository {
            AND commodity_id = ?
            AND status IN ('OPEN', 'PARTIALLY_FILLED')
            ${sideClause}
-         ORDER BY ${orderBy}, created_at ASC, id ASC`,
+         ORDER BY ${orderBy}, created_at ASC, rowid ASC`,
       )
       .all(...parameters) as unknown as OrderRow[];
     return rows.map(mapOrder);
