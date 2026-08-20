@@ -1,11 +1,11 @@
 node_modules/
 
 # Builds
- dist/
- build/
- coverage/
- playwright-report/
- test-results/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
 
 # Environment
 .env
