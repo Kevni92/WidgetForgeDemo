@@ -7,7 +7,10 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error('SERVER_PORT must be an integer between 1 and 65535');
 }
 
-const app = await buildApp({ logger: true });
+const app = await buildApp({
+  logger: true,
+  databasePath: process.env.DATABASE_PATH,
+});
 
 const shutdown = async (signal: string): Promise<void> => {
   app.log.info({ signal }, 'shutting down');
