@@ -171,7 +171,7 @@ Verantwortlich für:
 - Aufruf des Application Layers,
 - Versand von Resultaten und Resource-Updates.
 
-Die v1-Implementierung bündelt diese Aufgaben in einem `/ws`-Gateway, einer pro Connection isolierten `SubscriptionRegistry` und einem `PublicationHub`. Der Gateway validiert Frames vor jeder Weitergabe, leitet `market.orderbook` und `market.myOrders` über einen Resource Resolver auf den Application Layer und sendet vollständige Snapshots. Publication-Invalidierungen werden nur an passende aktive Subscriber verteilt; Mutation-Requests bleiben bis zum Folge-Issue kontrolliert abgelehnt.
+Die v1-Implementierung bündelt diese Aufgaben in einem `/ws`-Gateway, einer pro Connection isolierten `SubscriptionRegistry` und einem `PublicationHub`. Der Gateway validiert Frames vor jeder Weitergabe, leitet `market.orderbook` und `market.myOrders` über einen Resource Resolver auf den Application Layer und sendet vollständige Snapshots. Publication-Invalidierungen werden nur an passende aktive Subscriber verteilt; Place-/Cancel-Requests laufen über einen zentralen Mutation-Dispatcher.
 
 Nicht verantwortlich für:
 
@@ -196,6 +196,8 @@ Keine WebSocket-Objekte und keine Vue-/WidgetForge-Typen.
 Die v1-Market-Engine ist als `MarketService` umgesetzt. `placeOrder` und `cancelOrder` führen ihre fachlichen Änderungen über eine gemeinsame SQLite-Transaktion aus. Nach einem Commit liefern sie ein fachliches Mutation-Result plus interne Resource-Invalidierungen für Orderbook und betroffene `myOrders`-Sichten; Subscriber und WebSocket bleiben außerhalb dieser Schicht.
 
 Orderbook- und `myOrders`-Viewmodels werden aus konkreten Repositories erzeugt. Der Service verwendet dabei die Shared-Protocol-Typen für die transportnahen Input-/Result-Formen, ohne Datenbankmodelle in `packages/protocol` zu verschieben.
+
+Der Realtime-Mutation-Dispatcher übernimmt nur die Korrelation und Fehlerabbildung: Er ruft den `MarketService` mit der Session-Identität auf, sendet das Result mit `requestId` und übergibt die Invalidierungen an den `PublicationHub`. Eine Connection-lokale Request-ID wird nur einmal angenommen; Reconnects erzeugen keine Replay-Queue.
 
 ### Persistence Layer
 

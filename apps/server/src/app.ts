@@ -2,12 +2,14 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
 import { AppDatabase } from './db/database.js';
 import { seedDatabase } from './db/seed.js';
+import { MarketService } from './domain/market/service.js';
 import { registerRealtimeRoutes } from './realtime/realtime-server.js';
 
 export interface AppOptions {
   logger?: boolean;
   database?: AppDatabase;
   databasePath?: string;
+  marketService?: MarketService;
 }
 
 export async function buildApp(options: AppOptions = {}): Promise<FastifyInstance> {
@@ -26,6 +28,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   app.get('/health', async () => ({ status: 'ok' as const }));
   registerRealtimeRoutes(app, {
     database,
+    marketService: options.marketService,
     logger: {
       info: (message, details) => app.log.info(details ?? {}, message),
       warn: (message, details) => app.log.warn(details ?? {}, message),
