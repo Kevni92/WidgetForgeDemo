@@ -80,6 +80,12 @@ neuen WidgetForge-Data-Key neu gebunden; ein Mutation-Result patcht den Data-Cli
 nicht lokal. Die sichtbare Orderbook-Änderung kommt ausschließlich über den
 serverseitigen Snapshot zurück.
 
+`MarketMyOrdersWidget` ist davon unabhängig registriert und abonniert
+`market.myOrders(marketId, commodityId?)`. Es rendert nur vom Server gelieferte
+`OPEN`-/`PARTIALLY_FILLED`-Orders und sendet Cancel-Aktionen über
+`market.cancelOrder`. Auch ein erfolgreiches Cancel-Result entfernt keine Zeile
+lokal; erst der veröffentlichte `myOrders`-Snapshot aktualisiert die Anzeige.
+
 Der Client installiert `https://github.com/Kevni92/WidgetForge/archive/refs/heads/main.tar.gz`.
 Da das Repository den veröffentlichten `dist`-Ordner nicht versioniert, baut
 `scripts/prepare-widgetforge.mjs` den installierten Checkout vor Typecheck, Tests und

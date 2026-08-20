@@ -13,6 +13,7 @@ import {
 } from 'widgetforge';
 import { markRaw } from 'vue';
 import { DemoRealtimeTransport, type DemoRealtimeTransportOptions } from './realtime/demo-realtime-transport';
+import MarketMyOrdersWidget from './widgets/MarketMyOrdersWidget.vue';
 import MarketOrderbookWidget from './widgets/MarketOrderbookWidget.vue';
 
 export interface DemoClientRuntime {
@@ -51,12 +52,40 @@ export function createDemoClientRuntime(options: DemoRealtimeTransportOptions): 
         minimumUsefulSize: { width: 420, height: 420 },
       },
     }),
+    defineWidget({
+      id: 'market.my-orders',
+      title: 'My Orders',
+      description: 'Open and partially filled orders for the current demo player.',
+      component: MarketMyOrdersWidget,
+      parameters: {
+        marketId: {
+          type: 'string',
+          default: 'market-1',
+          description: 'Market resource identifier.',
+        },
+      },
+      window: {
+        defaultSize: { width: 680, height: 380 },
+        minSize: { width: 480, height: 280 },
+      },
+      capabilities: {
+        multipleInstances: true,
+        dockable: true,
+        tabCompatible: true,
+        minimumUsefulSize: { width: 480, height: 280 },
+      },
+    }),
   ]));
   const manager = markRaw(createWindowManager(registry));
   manager.open({
     widgetId: 'market.orderbook',
     instanceId: 'market-orderbook-main',
     position: { x: 24, y: 24 },
+  });
+  manager.open({
+    widgetId: 'market.my-orders',
+    instanceId: 'market-my-orders-main',
+    position: { x: 120, y: 120 },
   });
 
   return {

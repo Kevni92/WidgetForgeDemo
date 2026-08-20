@@ -144,5 +144,6 @@ Architektur und Protokoll:
 Die Issues #1–#8 sind umgesetzt und jeweils in einem eigenen Pull Request gegen `main`
 gemerged. Der aktuelle Client enthält das registrierte Market-Orderbook-Widget mit
 Commodity-Auswahl, Live-Orderbook, BUY/SELL-Limit-Order-Formular sowie Loading-, Empty-,
-Error- und Pending-Zuständen. Die verbleibenden Meilensteine sind My Orders (#9), E2E
+Error- und Pending-Zuständen. Das eigenständige My-Orders-Widget mit Live-Cancel-Flow
+ist ebenfalls umgesetzt. Die verbleibenden Meilensteine sind der Multi-Client-E2E-Test
 (#10) und Developer-Diagnostics/Reset (#11).
