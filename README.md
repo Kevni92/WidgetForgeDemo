@@ -119,10 +119,10 @@ Verbindliche Regeln für Codex/Claude/andere Coding Agents stehen in:
 
 Architektur und Protokoll:
 
-- [`ARCHITECTURE.md`](./ARCHITECTURE.md)
-- [`PROTOCOL.md`](./PROTOCOL.md)
-- [`ROADMAP.md`](./ROADMAP.md)
-- [`DECISIONS.md`](./DECISIONS.md)
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- [`docs/PROTOCOL.md`](./docs/PROTOCOL.md)
+- [`docs/ROADMAP.md`](./docs/ROADMAP.md)
+- [`docs/DECISIONS.md`](./docs/DECISIONS.md)
 
 ## Status
 

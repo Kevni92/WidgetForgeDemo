@@ -336,6 +336,8 @@ Pagination/Streaming großer Ressourcen ist nicht Teil von v1.
 
 Aus den Schemas sollen die TypeScript-Typen abgeleitet werden, statt Typ und Validator manuell doppelt zu pflegen.
 
+Die v1-Implementierung verwendet dafür exportierte Zod-Schemas und abgeleitete TypeScript-Typen aus `@widgetforge-demo/protocol`. Die Resource-Namen sind `market.orderbook` und `market.myOrders`; Mutation-Namen sind `market.placeOrder` und `market.cancelOrder`. Preis- und Mengenwerte sind positive Integer. Wire-Objekte werden strikt validiert, sodass unbekannte Felder und unbekannte Discriminator-Werte kontrolliert abgelehnt werden.
+
 ## Versionierung
 
 Erste Version:
