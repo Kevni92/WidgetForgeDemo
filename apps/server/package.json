@@ -21,7 +21,9 @@
     "@widgetforge-demo/protocol": "0.1.0"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "tsx": "^4.19.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "ws": "^8.18.3"
   }
 }

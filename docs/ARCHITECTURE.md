@@ -171,6 +171,8 @@ Verantwortlich für:
 - Aufruf des Application Layers,
 - Versand von Resultaten und Resource-Updates.
 
+Die v1-Implementierung bündelt diese Aufgaben in einem `/ws`-Gateway, einer pro Connection isolierten `SubscriptionRegistry` und einem `PublicationHub`. Der Gateway validiert Frames vor jeder Weitergabe, leitet `market.orderbook` und `market.myOrders` über einen Resource Resolver auf den Application Layer und sendet vollständige Snapshots. Publication-Invalidierungen werden nur an passende aktive Subscriber verteilt; Mutation-Requests bleiben bis zum Folge-Issue kontrolliert abgelehnt.
+
 Nicht verantwortlich für:
 
 - Matching-Regeln,
