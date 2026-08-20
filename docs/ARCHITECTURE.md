@@ -72,6 +72,14 @@ Damit bleibt Installation und lokaler Start ohne zusätzlichen Monorepo-Orchestr
 
 WidgetForge bleibt Source of Truth für Workspace-/Window-/Pane-Infrastruktur sowie Data-/Mutation-Bindings.
 
+Das erste Demo-Widget ist als öffentlich registriertes WidgetForge-Widget umgesetzt.
+`MarketOrderbookWidget` verwendet `useData` für die Resource
+`market.orderbook(marketId, commodityId)` und `useMutation` für
+`market.placeOrder`. Der Resource-Teil wird bei einem Commodity-Wechsel mit einem
+neuen WidgetForge-Data-Key neu gebunden; ein Mutation-Result patcht den Data-Client
+nicht lokal. Die sichtbare Orderbook-Änderung kommt ausschließlich über den
+serverseitigen Snapshot zurück.
+
 Der Client installiert `https://github.com/Kevni92/WidgetForge/archive/refs/heads/main.tar.gz`.
 Da das Repository den veröffentlichten `dist`-Ordner nicht versioniert, baut
 `scripts/prepare-widgetforge.mjs` den installierten Checkout vor Typecheck, Tests und

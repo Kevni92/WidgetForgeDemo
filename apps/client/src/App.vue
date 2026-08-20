@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { DataClientProvider, MutationClientProvider } from 'widgetforge';
+import {
+  DataClientProvider,
+  MutationClientProvider,
+  ThemeProvider,
+  WindowManagerHost,
+  forgeDarkTheme,
+} from 'widgetforge';
 import type { DemoClientRuntime } from './client-runtime';
 
 const props = defineProps<DemoClientRuntime>();
@@ -24,40 +30,55 @@ async function changePlayer(): Promise<void> {
 </script>
 
 <template>
-  <DataClientProvider :client="dataClient">
-    <MutationClientProvider :client="mutationClient">
-      <main class="app-shell">
-        <h1>WidgetForge Demo</h1>
-        <p>Bootstrap ready</p>
-        <label>
-          Demo player
-          <select
-            v-model="selectedPlayerId"
-            @change="void changePlayer()"
+  <ThemeProvider :theme="forgeDarkTheme">
+    <DataClientProvider :client="dataClient">
+      <MutationClientProvider :client="mutationClient">
+        <main class="app-shell">
+          <header class="app-header">
+            <div class="app-title">
+              <h1>WidgetForge Demo</h1>
+              <p>Bootstrap ready</p>
+            </div>
+            <div class="connection-controls">
+              <label>
+                Demo player
+                <select
+                  v-model="selectedPlayerId"
+                  @change="void changePlayer()"
+                >
+                  <option value="player-a">Player A</option>
+                  <option value="player-b">Player B</option>
+                </select>
+              </label>
+              <p data-testid="connection-status">
+                Connection: {{ connectionStatus }}
+              </p>
+              <p
+                v-if="connectionError"
+                class="error"
+              >
+                {{ connectionError }}
+              </p>
+            </div>
+          </header>
+          <section
+            class="workspace-shell"
+            aria-label="WidgetForge workspace"
           >
-            <option value="player-a">Player A</option>
-            <option value="player-b">Player B</option>
-          </select>
-        </label>
-        <p data-testid="connection-status">
-          Connection: {{ connectionStatus }}
-        </p>
-        <p
-          v-if="connectionError"
-          class="error"
-        >
-          {{ connectionError }}
-        </p>
-      </main>
-    </MutationClientProvider>
-  </DataClientProvider>
+            <WindowManagerHost
+              :manager="manager"
+              :registry="registry"
+            />
+          </section>
+        </main>
+      </MutationClientProvider>
+    </DataClientProvider>
+  </ThemeProvider>
 </template>
 
 <style>
 :root {
-  color: #e2e8f0;
-  background: #0f172a;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color-scheme: dark;
 }
 
 body {
@@ -67,9 +88,25 @@ body {
 .app-shell {
   min-height: 100vh;
   display: grid;
-  place-content: center;
-  gap: 0.5rem;
-  text-align: center;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: var(--wf-color-canvas);
+  color: var(--wf-color-text);
+  font-family: var(--wf-font-family);
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+
+.app-title {
+  display: grid;
+  gap: 0.25rem;
 }
 
 label {
@@ -87,6 +124,23 @@ select {
   color: #fca5a5;
 }
 
+.connection-controls {
+  display: flex;
+  align-items: end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+
+.workspace-shell {
+  position: relative;
+  min-height: 640px;
+  overflow: hidden;
+  border: 1px solid var(--wf-color-border);
+  border-radius: var(--wf-radius-md);
+  background: var(--wf-color-surface);
+}
+
 h1 {
   margin: 0;
   font-size: 2rem;
@@ -95,5 +149,15 @@ h1 {
 p {
   margin: 0;
   color: #94a3b8;
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    flex-direction: column;
+  }
+
+  .connection-controls {
+    justify-content: start;
+  }
 }
 </style>
