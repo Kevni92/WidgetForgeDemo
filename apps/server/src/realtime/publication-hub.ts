@@ -79,6 +79,16 @@ export class PublicationHub {
     }
   }
 
+  publishMany(invalidations: readonly ResourceInvalidation[]): void {
+    const unique = new Map<string, ResourceInvalidation>();
+    for (const invalidation of invalidations) {
+      unique.set(invalidationKey(invalidation), invalidation);
+    }
+    for (const invalidation of unique.values()) {
+      this.publish(invalidation);
+    }
+  }
+
   connectionCount(): number {
     return this.subscriptions.connectionCount();
   }
@@ -174,4 +184,8 @@ function matches(
     subscription.params.marketId === invalidation.marketId &&
     (!subscription.params.commodityId || subscription.params.commodityId === invalidation.commodityId)
   );
+}
+
+function invalidationKey(invalidation: ResourceInvalidation): string {
+  return JSON.stringify(invalidation);
 }

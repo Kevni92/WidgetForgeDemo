@@ -281,6 +281,8 @@ Weitere Codes nur bei tatsächlichem Bedarf.
 
 Der Server darf dieselbe `requestId` innerhalb derselben Connection nicht als zwei unabhängige gleichzeitige Requests akzeptieren.
 
+Die v1-Implementierung verwirft eine `requestId` nach ihrer ersten Annahme für die gesamte Lebensdauer der Connection; auch nach abgeschlossenem Result wird sie nicht wiederverwendet. Das ist eine einfache Connection-lokale Regel und ersetzt keine persistente Idempotency.
+
 V1 garantiert **keine persistente Idempotency über Reconnects**. Das ist bewusst wichtig:
 
 ```text
@@ -311,6 +313,8 @@ Beispiele:
 - My Orders des Eigentümers.
 
 Publication erfolgt erst nach erfolgreichem DB-Commit.
+
+Die WebSocket-Mutationsrouten senden nach erfolgreichem Domain-Commit zuerst das korrelierte `mutation.result` und publizieren anschließend jede betroffene Resource höchstens einmal pro Mutation als vollständigen Snapshot. Bei Domainfehlern wird ausschließlich `mutation.error` gesendet; bei Rollback erfolgt keine Resource-Publication.
 
 ## Reconnect
 
