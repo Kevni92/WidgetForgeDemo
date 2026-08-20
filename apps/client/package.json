@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "prepare:widgetforge": "node ../../scripts/prepare-widgetforge.mjs",
-    "pretypecheck": "npm run prepare:widgetforge",
-    "pretest": "npm run prepare:widgetforge",
-    "prebuild": "npm run prepare:widgetforge",
+    "pretypecheck": "npm run build --workspace @widgetforge-demo/protocol && npm run prepare:widgetforge",
+    "pretest": "npm run build --workspace @widgetforge-demo/protocol && npm run prepare:widgetforge",
+    "prebuild": "npm run build --workspace @widgetforge-demo/protocol && npm run prepare:widgetforge",
     "build": "vue-tsc --noEmit && vite build",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run"
