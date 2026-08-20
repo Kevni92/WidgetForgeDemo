@@ -141,4 +141,8 @@ Architektur und Protokoll:
 
 ## Status
 
-Das Repository befindet sich im Projekt-Setup. Die Implementierung wird issueweise in eigenen Branches und Pull Requests aufgebaut.
+Die Issues #1–#8 sind umgesetzt und jeweils in einem eigenen Pull Request gegen `main`
+gemerged. Der aktuelle Client enthält das registrierte Market-Orderbook-Widget mit
+Commodity-Auswahl, Live-Orderbook, BUY/SELL-Limit-Order-Formular sowie Loading-, Empty-,
+Error- und Pending-Zuständen. Die verbleibenden Meilensteine sind My Orders (#9), E2E
+(#10) und Developer-Diagnostics/Reset (#11).
