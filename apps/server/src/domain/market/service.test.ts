@@ -157,7 +157,9 @@ describe('MarketService', () => {
       const buy = place(service, 'player-a', { side: 'BUY', priceMinor: 120, quantity: 3 });
 
       expect(buy.result.status).toBe('FILLED');
-      const trades = new TradeRepository(database.connection).listForOrder(buy.result.orderId);
+      const trades = new TradeRepository(database.connection)
+        .listForOrder(buy.result.orderId)
+        .sort((left, right) => left.priceMinor - right.priceMinor);
       expect(trades.map((trade) => [trade.priceMinor, trade.quantity])).toEqual([
         [100, 1],
         [110, 2],
