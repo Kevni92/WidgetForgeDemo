@@ -18,4 +18,14 @@ describe('server app', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ status: 'ok' });
   });
+
+  it('does not register developer reset or diagnostics routes in production', async () => {
+    app = await buildApp({ environment: 'production' });
+
+    const diagnostics = await app.inject({ method: 'GET', url: '/dev/diagnostics' });
+    const reset = await app.inject({ method: 'POST', url: '/dev/reset' });
+
+    expect(diagnostics.statusCode).toBe(404);
+    expect(reset.statusCode).toBe(404);
+  });
 });

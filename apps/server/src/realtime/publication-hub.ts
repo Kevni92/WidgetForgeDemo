@@ -1,6 +1,7 @@
 import type {
   MarketMyOrdersData,
   MarketOrderbookData,
+  ResourceName,
   ServerMessage,
 } from '@widgetforge-demo/protocol';
 import type { ResourceInvalidation } from '../domain/market/service.js';
@@ -17,6 +18,24 @@ export type MessageSender = (message: ServerMessage) => void;
 interface Connection {
   send: MessageSender;
   playerId?: string;
+  pendingMutations: number;
+}
+
+export interface PublicationDiagnostics {
+  readonly connections: {
+    readonly active: number;
+    readonly entries: readonly {
+      readonly connectionId: string;
+      readonly demoPlayerId?: string;
+      readonly subscriptions: number;
+      readonly pendingMutations: number;
+    }[];
+  };
+  readonly subscriptions: {
+    readonly total: number;
+    readonly byResource: readonly { readonly resource: ResourceName; readonly count: number }[];
+  };
+  readonly pendingMutations: number;
 }
 
 export class PublicationHub {
@@ -29,7 +48,7 @@ export class PublicationHub {
   }
 
   addConnection(connectionId: string, send: MessageSender): void {
-    this.connections.set(connectionId, { send });
+    this.connections.set(connectionId, { send, pendingMutations: 0 });
     this.subscriptions.addConnection(connectionId);
   }
 
@@ -89,12 +108,66 @@ export class PublicationHub {
     }
   }
 
+  refreshAll(): number {
+    let refreshed = 0;
+    for (const subscription of this.subscriptions.list()) {
+      const connectionId = this.findConnectionId(subscription);
+      const connection = connectionId ? this.connections.get(connectionId) : undefined;
+      if (!connection) continue;
+      connection.send(this.createSnapshot(subscription));
+      refreshed += 1;
+    }
+    return refreshed;
+  }
+
+  beginMutation(connectionId: string): void {
+    const connection = this.connections.get(connectionId);
+    if (connection) connection.pendingMutations += 1;
+  }
+
+  endMutation(connectionId: string): void {
+    const connection = this.connections.get(connectionId);
+    if (connection) connection.pendingMutations = Math.max(0, connection.pendingMutations - 1);
+  }
+
+  diagnostics(): PublicationDiagnostics {
+    const subscriptionsByResource = new Map<ResourceName, number>();
+    for (const subscription of this.subscriptions.list()) {
+      subscriptionsByResource.set(
+        subscription.resource,
+        (subscriptionsByResource.get(subscription.resource) ?? 0) + 1,
+      );
+    }
+    const entries = [...this.connections.entries()].map(([connectionId, connection]) => {
+      const entry = {
+        connectionId,
+        subscriptions: this.subscriptionsForConnection(connectionId),
+        pendingMutations: connection.pendingMutations,
+      };
+      return connection.playerId ? { ...entry, demoPlayerId: connection.playerId } : entry;
+    });
+    return {
+      connections: { active: entries.length, entries },
+      subscriptions: {
+        total: this.subscriptionCount(),
+        byResource: [...subscriptionsByResource.entries()].map(([resource, count]) => ({ resource, count })),
+      },
+      pendingMutations: entries.reduce((total, entry) => total + entry.pendingMutations, 0),
+    };
+  }
+
   connectionCount(): number {
     return this.subscriptions.connectionCount();
   }
 
   subscriptionCount(): number {
     return this.subscriptions.subscriptionCount();
+  }
+
+  private subscriptionsForConnection(connectionId: string): number {
+    return this.subscriptions.list().filter((subscription) => (
+      this.subscriptions.get(connectionId, subscription.subscriptionId) === subscription
+    )).length;
   }
 
   private createSnapshot(subscription: RegisteredSubscription): ServerMessage {

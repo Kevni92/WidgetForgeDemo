@@ -135,50 +135,55 @@ export function registerRealtimeRoutes(
       message: Extract<ClientMessage, { type: 'mutation.request' }>,
       sessionPlayerId: string,
     ): void {
-      if (requestIds.has(message.requestId)) {
-        throw new Error(`Duplicate request ID: ${message.requestId}`);
-      }
-      requestIds.add(message.requestId);
-
-      let execution: MutationExecution;
+      publicationHub.beginMutation(connectionId);
       try {
-        execution = mutationDispatcher.dispatch(sessionPlayerId, message);
-      } catch (error) {
-        send(socket, {
-          type: 'mutation.error',
-          requestId: message.requestId,
-          mutation: message.mutation,
-          error: mutationErrorFor(error),
-        });
-        logger.warn('mutation.error', {
+        if (requestIds.has(message.requestId)) {
+          throw new Error(`Duplicate request ID: ${message.requestId}`);
+        }
+        requestIds.add(message.requestId);
+
+        let execution: MutationExecution;
+        try {
+          execution = mutationDispatcher.dispatch(sessionPlayerId, message);
+        } catch (error) {
+          send(socket, {
+            type: 'mutation.error',
+            requestId: message.requestId,
+            mutation: message.mutation,
+            error: mutationErrorFor(error),
+          });
+          logger.warn('mutation.error', {
+            connectionId,
+            requestId: message.requestId,
+            mutation: message.mutation,
+          });
+          return;
+        }
+
+        if (execution.mutation === 'market.placeOrder') {
+          send(socket, {
+            type: 'mutation.result',
+            requestId: message.requestId,
+            mutation: 'market.placeOrder',
+            result: execution.result,
+          });
+        } else {
+          send(socket, {
+            type: 'mutation.result',
+            requestId: message.requestId,
+            mutation: 'market.cancelOrder',
+            result: execution.result,
+          });
+        }
+        publicationHub.publishMany(execution.invalidations);
+        logger.info('mutation.result', {
           connectionId,
           requestId: message.requestId,
           mutation: message.mutation,
         });
-        return;
+      } finally {
+        publicationHub.endMutation(connectionId);
       }
-
-      if (execution.mutation === 'market.placeOrder') {
-        send(socket, {
-          type: 'mutation.result',
-          requestId: message.requestId,
-          mutation: 'market.placeOrder',
-          result: execution.result,
-        });
-      } else {
-        send(socket, {
-          type: 'mutation.result',
-          requestId: message.requestId,
-          mutation: 'market.cancelOrder',
-          result: execution.result,
-        });
-      }
-      publicationHub.publishMany(execution.invalidations);
-      logger.info('mutation.result', {
-        connectionId,
-        requestId: message.requestId,
-        mutation: message.mutation,
-      });
     }
 
     function subscribe(message: ResourceSubscribeMessage, sessionPlayerId: string): void {

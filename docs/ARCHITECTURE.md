@@ -202,6 +202,15 @@ Nicht verantwortlich für:
 - Eigentumsprüfung von Orders,
 - Transaktionslogik.
 
+### Developer-Diagnostics und Reset
+
+Außerhalb von Production registriert der Server zwei kleine, nicht fachliche HTTP-Endpunkte:
+
+- `GET /dev/diagnostics` liefert Environment, DB-Pfad, Protokollversion sowie Connection-, Subscription- und Pending-Mutation-Zähler ohne Request-Payloads.
+- `POST /dev/reset` führt den expliziten lokalen Resetpfad `drop -> migrate -> seed` aus und veröffentlicht danach für alle bestehenden Subscriptions frische vollständige Snapshots.
+
+Der Reset läuft synchron im Node-Eventloop und kann dadurch nicht zwischen zwei synchron ausgeführten Domain-/DB-Schritten eingeschoben werden. Er ist keine normale Market-Mutation und wird bei `NODE_ENV=production` gar nicht registriert. Die Client-Diagnostics-Fläche nutzt für lokale Data-/Mutation-Zähler ausschließlich die öffentlichen WidgetForge-Diagnostics-Methoden.
+
 ### Client-Realtime-Transport
 
 `DemoRealtimeTransport` implementiert die öffentlichen WidgetForge-Verträge

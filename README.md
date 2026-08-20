@@ -127,6 +127,8 @@ npm run test:e2e
 
 Die Suite setzt die E2E-Datenbank vor dem Lauf zurück und legt sie unter `e2e/.tmp/` an. Für die lokale Ausführung muss der Chromium-Browser einmal installiert werden (`npx playwright install chromium`).
 
+Im Development- und Testbetrieb zeigt die Anwendung zusätzlich eine Developer-Diagnostics-Fläche. Sie verwendet die öffentlichen WidgetForge-Diagnostik-APIs für Client-Ressourcen und Mutation-Handles und zeigt serverseitige Connection-/Subscription-Zähler. Der Button `Reset demo state` setzt die lokale Demo-Datenbank auf den Seed zurück und veröffentlicht frische Snapshots an aktive Subscriptions. Die zugehörigen HTTP-Endpunkte (`GET /dev/diagnostics`, `POST /dev/reset`) werden bei `NODE_ENV=production` nicht registriert.
+
 ## Umsetzung
 
 Der erste Meilenstein ist als GitHub-Issues #1–#10 geschnitten. #11 ist ein nachgelagertes Diagnostics-/Reset-Issue.
