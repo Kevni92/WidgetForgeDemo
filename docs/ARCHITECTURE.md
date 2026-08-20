@@ -191,6 +191,10 @@ Verantwortlich für:
 
 Keine WebSocket-Objekte und keine Vue-/WidgetForge-Typen.
 
+Die v1-Market-Engine ist als `MarketService` umgesetzt. `placeOrder` und `cancelOrder` führen ihre fachlichen Änderungen über eine gemeinsame SQLite-Transaktion aus. Nach einem Commit liefern sie ein fachliches Mutation-Result plus interne Resource-Invalidierungen für Orderbook und betroffene `myOrders`-Sichten; Subscriber und WebSocket bleiben außerhalb dieser Schicht.
+
+Orderbook- und `myOrders`-Viewmodels werden aus konkreten Repositories erzeugt. Der Service verwendet dabei die Shared-Protocol-Typen für die transportnahen Input-/Result-Formen, ohne Datenbankmodelle in `packages/protocol` zu verschieben.
+
 ### Persistence Layer
 
 Verantwortlich für:

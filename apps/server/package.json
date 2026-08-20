@@ -8,13 +8,17 @@
     "db:migrate": "tsx src/db/cli.ts migrate",
     "db:seed": "tsx src/db/cli.ts seed",
     "db:reset": "tsx src/db/cli.ts reset",
+    "prebuild": "npm run build --workspace @widgetforge-demo/protocol",
     "build": "tsc -p tsconfig.json",
+    "pretypecheck": "npm run build --workspace @widgetforge-demo/protocol",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "npm run build --workspace @widgetforge-demo/protocol",
     "test": "vitest run"
   },
   "dependencies": {
     "@fastify/websocket": "^11.1.0",
-    "fastify": "^5.4.0"
+    "fastify": "^5.4.0",
+    "@widgetforge-demo/protocol": "0.1.0"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
