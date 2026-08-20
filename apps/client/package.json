@@ -5,12 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "prepare:widgetforge": "node ../../scripts/prepare-widgetforge.mjs",
+    "pretypecheck": "npm run prepare:widgetforge",
+    "pretest": "npm run prepare:widgetforge",
+    "prebuild": "npm run prepare:widgetforge",
     "build": "vue-tsc --noEmit && vite build",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "vue": "^3.5.17"
+    "@widgetforge-demo/protocol": "0.1.0",
+    "vue": "^3.5.17",
+    "widgetforge": "https://github.com/Kevni92/WidgetForge/archive/refs/heads/main.tar.gz"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",

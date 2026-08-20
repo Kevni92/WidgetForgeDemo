@@ -2,7 +2,7 @@
 
 Referenz- und End-to-End-Demo für [WidgetForge](https://github.com/Kevni92/WidgetForge).
 
-Das Projekt zeigt, wie eine datengetriebene, serverautoritative Anwendung mit WidgetForge als veröffentlichtem npm-Paket aufgebaut werden kann. Die Demo orientiert sich an einem kleinen Markt-/Order-System im Stil datenlastiger Wirtschaftssimulationen.
+Das Projekt zeigt, wie eine datengetriebene, serverautoritative Anwendung mit WidgetForge als GitHub-npm-Abhängigkeit aufgebaut werden kann. Die Demo orientiert sich an einem kleinen Markt-/Order-System im Stil datenlastiger Wirtschaftssimulationen.
 
 ## Zielbild
 
@@ -24,7 +24,7 @@ SQLite
 ## Grundprinzipien
 
 - TypeScript auf Client und Server.
-- WidgetForge wird ausschließlich als externe npm-Abhängigkeit verwendet.
+- WidgetForge wird ausschließlich als externe Repository-npm-Abhängigkeit verwendet (`https://github.com/Kevni92/WidgetForge/archive/refs/heads/main.tar.gz`).
 - Keine internen `WidgetForge/src/...`-Imports.
 - Der Server ist autoritativ für Domain-State.
 - Reads laufen über Ressourcen/Subscriptions.
@@ -72,6 +72,11 @@ docs/
 Die genaue Struktur wird im Bootstrap-Issue umgesetzt. `packages/domain` wird nicht vorsorglich mit Logik gefüllt; Server-Domainlogik bleibt grundsätzlich auf dem Server.
 
 ## Abhängigkeit von WidgetForge
+
+Der Client installiert WidgetForge direkt aus dem Repository. Der GitHub-Checkout enthält
+den Quellcode, aber keinen versionierten `dist`-Ordner; der lokale/CI-Prepare-Schritt baut
+diesen Checkout vor den Client-Checks. Der Demo-Code nutzt danach ausschließlich öffentliche
+Exports aus `widgetforge` und keine internen Dateien.
 
 Vor der vollständigen End-to-End-Integration sollen die WidgetForge-Issues für Mutationen und Realtime-Write-Support abgeschlossen sein:
 
