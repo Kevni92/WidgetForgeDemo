@@ -104,6 +104,16 @@ npm run build
 
 Lokale Konfiguration kann aus `.env.example` abgeleitet werden. SQLite-Dateien, Builds, Coverage und `.env`-Dateien werden nicht versioniert.
 
+Die lokale SQLite-Datenbank wird ausschließlich über explizite Kommandos vorbereitet:
+
+```text
+npm run db:migrate
+npm run db:seed
+npm run db:reset
+```
+
+`db:reset` setzt die Datenbank auf Migration plus deterministischen Seed zurück. Der Datenbankpfad kommt aus `DATABASE_PATH` und fällt standardmäßig auf `data/widgetforge-demo.sqlite` zurück. Der Serverstart führt keinen destruktiven Reset aus.
+
 ## Umsetzung
 
 Der erste Meilenstein ist als GitHub-Issues #1–#10 geschnitten. #11 ist ein nachgelagertes Diagnostics-/Reset-Issue.
