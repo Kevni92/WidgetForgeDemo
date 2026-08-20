@@ -4,13 +4,14 @@ node_modules/
 dist/
 build/
 coverage/
+.vite/
 playwright-report/
 test-results/
 
 # Environment
 .env
 .env.local
-.env.*.local
+.env.*
 !.env.example
 
 # SQLite runtime files

@@ -82,6 +82,28 @@ Vor der vollständigen End-to-End-Integration sollen die WidgetForge-Issues für
 
 Die Server-/SQLite-Arbeit dieses Repositories kann teilweise parallel vorbereitet werden. Der Client darf jedoch keine privaten Übergangs-APIs aus WidgetForge verwenden.
 
+## Lokale Entwicklung
+
+Voraussetzung ist Node.js 24 und npm 11.
+
+```text
+npm install
+npm run dev
+```
+
+Damit starten Client und Server parallel. Der Client ist unter `http://127.0.0.1:5173` erreichbar, die Server-Health-Route unter `http://127.0.0.1:3000/health`.
+
+Die reproduzierbaren lokalen Checks sind:
+
+```text
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+Lokale Konfiguration kann aus `.env.example` abgeleitet werden. SQLite-Dateien, Builds, Coverage und `.env`-Dateien werden nicht versioniert.
+
 ## Umsetzung
 
 Der erste Meilenstein ist als GitHub-Issues #1–#10 geschnitten. #11 ist ein nachgelagertes Diagnostics-/Reset-Issue.
@@ -97,10 +119,10 @@ Verbindliche Regeln für Codex/Claude/andere Coding Agents stehen in:
 
 Architektur und Protokoll:
 
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
-- [`docs/PROTOCOL.md`](./docs/PROTOCOL.md)
-- [`docs/ROADMAP.md`](./docs/ROADMAP.md)
-- [`docs/DECISIONS.md`](./docs/DECISIONS.md)
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md)
+- [`PROTOCOL.md`](./PROTOCOL.md)
+- [`ROADMAP.md`](./ROADMAP.md)
+- [`DECISIONS.md`](./DECISIONS.md)
 
 ## Status
 
