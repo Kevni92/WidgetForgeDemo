@@ -66,11 +66,20 @@ Damit bleibt Installation und lokaler Start ohne zusätzlichen Monorepo-Orchestr
 - Vue 3
 - TypeScript strict
 - Vite
-- WidgetForge aus npm
+- WidgetForge aus dem GitHub-Repository als npm-HTTPS-Abhängigkeit
 - Vitest für Unit-/Component-Tests
 - Playwright für E2E
 
 WidgetForge bleibt Source of Truth für Workspace-/Window-/Pane-Infrastruktur sowie Data-/Mutation-Bindings.
+
+Der Client installiert `https://github.com/Kevni92/WidgetForge/archive/refs/heads/main.tar.gz`.
+Da das Repository den veröffentlichten `dist`-Ordner nicht versioniert, baut
+`scripts/prepare-widgetforge.mjs` den installierten Checkout vor Typecheck, Tests und
+Build mit seinen eigenen Entwicklungsabhängigkeiten. Die Anwendung importiert danach
+ausschließlich aus dem öffentlichen Paket-Root `widgetforge`; interne
+`widgetforge/src/...`-Pfade sind verboten. Die Build-Abhängigkeiten werden nach dem
+Build aus dem Checkout entfernt, damit WidgetForge und die Demo dieselbe Vue-Instanz
+verwenden.
 
 ### Server
 
@@ -178,6 +187,25 @@ Nicht verantwortlich für:
 - Matching-Regeln,
 - Eigentumsprüfung von Orders,
 - Transaktionslogik.
+
+### Client-Realtime-Transport
+
+`DemoRealtimeTransport` implementiert die öffentlichen WidgetForge-Verträge
+`RealtimeTransport` und `RealtimeMutationTransport` mit genau einer WebSocket-Verbindung
+für beide Richtungen. Der Transport übernimmt:
+
+- `session.hello`/`session.ready` und die auswählbare Demo-Identität,
+- Runtime-Parsing aller Servernachrichten über `packages/protocol`,
+- Subscription-ID- und Request-ID-Korrelation,
+- vollständige Resource-Snapshots für `market.orderbook` und `market.myOrders`,
+- die Zustände `connecting`, `connected`, `reconnecting`, `disconnected` und `error`,
+- Reconnect mit erneutem Session-Handshake und Rebind aktiver Subscriptions.
+
+Pending Mutations werden bei einer Unterbrechung mit einem Ergebnis-unklar-Fehler beendet
+und niemals automatisch erneut gesendet. Die beiden öffentlichen WidgetForge-Adapter
+`createRealtimeDataProvider` und `createRealtimeMutationProvider` teilen sich dasselbe
+Transportobjekt; die Vue-Provider stellen die daraus erzeugten Clients im Komponentenbaum
+bereit.
 
 ### Application/Domain Layer
 

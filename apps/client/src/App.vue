@@ -1,12 +1,56 @@
 <script setup lang="ts">
-const status = 'Bootstrap ready';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { DataClientProvider, MutationClientProvider } from 'widgetforge';
+import type { DemoClientRuntime } from './client-runtime';
+
+const props = defineProps<DemoClientRuntime>();
+const connectionStatus = ref(props.transport.connectionState.status);
+const connectionError = ref<string | null>(props.transport.connectionState.error?.message ?? null);
+const selectedPlayerId = ref(props.transport.currentDemoPlayerId);
+let stopObservingConnection: (() => void) | null = null;
+
+onMounted(() => {
+  stopObservingConnection = props.transport.observeConnection((state) => {
+    connectionStatus.value = state.status;
+    connectionError.value = state.error?.message ?? null;
+  });
+});
+
+onUnmounted(() => stopObservingConnection?.());
+
+async function changePlayer(): Promise<void> {
+  await props.transport.setDemoPlayerId(selectedPlayerId.value);
+}
 </script>
 
 <template>
-  <main class="app-shell">
-    <h1>WidgetForge Demo</h1>
-    <p>{{ status }}</p>
-  </main>
+  <DataClientProvider :client="dataClient">
+    <MutationClientProvider :client="mutationClient">
+      <main class="app-shell">
+        <h1>WidgetForge Demo</h1>
+        <p>Bootstrap ready</p>
+        <label>
+          Demo player
+          <select
+            v-model="selectedPlayerId"
+            @change="void changePlayer()"
+          >
+            <option value="player-a">Player A</option>
+            <option value="player-b">Player B</option>
+          </select>
+        </label>
+        <p data-testid="connection-status">
+          Connection: {{ connectionStatus }}
+        </p>
+        <p
+          v-if="connectionError"
+          class="error"
+        >
+          {{ connectionError }}
+        </p>
+      </main>
+    </MutationClientProvider>
+  </DataClientProvider>
 </template>
 
 <style>
@@ -26,6 +70,21 @@ body {
   place-content: center;
   gap: 0.5rem;
   text-align: center;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+select {
+  min-width: 10rem;
+  padding: 0.35rem;
+}
+
+.error {
+  color: #fca5a5;
 }
 
 h1 {
