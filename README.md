@@ -119,6 +119,14 @@ npm run db:reset
 
 `db:reset` setzt die Datenbank auf Migration plus deterministischen Seed zurück. Der Datenbankpfad kommt aus `DATABASE_PATH` und fällt standardmäßig auf `data/widgetforge-demo.sqlite` zurück. Der Serverstart führt keinen destruktiven Reset aus.
 
+Der echte Multi-Client-End-to-End-Test läuft mit Playwright gegen einen isolierten SQLite-Testbestand. Er startet Server und Client selbst, öffnet zwei Browser-Kontexte für Player A und B und prüft Place, Matching, Partial Fill, Cancel, Fremdzugriff, Reconnect, Shared Subscriptions sowie die Persistenz nach einem Serverneustart:
+
+```text
+npm run test:e2e
+```
+
+Die Suite setzt die E2E-Datenbank vor dem Lauf zurück und legt sie unter `e2e/.tmp/` an. Für die lokale Ausführung muss der Chromium-Browser einmal installiert werden (`npx playwright install chromium`).
+
 ## Umsetzung
 
 Der erste Meilenstein ist als GitHub-Issues #1–#10 geschnitten. #11 ist ein nachgelagertes Diagnostics-/Reset-Issue.
@@ -141,7 +149,7 @@ Architektur und Protokoll:
 
 ## Status
 
-Die Issues #1–#8 sind umgesetzt und jeweils in einem eigenen Pull Request gegen `main`
+Die Issues #1–#9 sind umgesetzt und jeweils in einem eigenen Pull Request gegen `main`
 gemerged. Der aktuelle Client enthält das registrierte Market-Orderbook-Widget mit
 Commodity-Auswahl, Live-Orderbook, BUY/SELL-Limit-Order-Formular sowie Loading-, Empty-,
 Error- und Pending-Zuständen. Das eigenständige My-Orders-Widget mit Live-Cancel-Flow

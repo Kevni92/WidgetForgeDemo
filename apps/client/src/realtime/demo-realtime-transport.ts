@@ -97,6 +97,7 @@ export class DemoRealtimeTransport implements RealtimeTransport, RealtimeMutatio
   private connectionAttempt: Promise<void> | null = null;
   private connectionAttemptResolve: (() => void) | null = null;
   private connectionAttemptReject: ((error: Error) => void) | null = null;
+  private readonly disconnectWaiters = new Set<() => void>();
   private manuallyDisconnected = false;
   private reconnectAfterClose = false;
   private disposed = false;
@@ -117,6 +118,10 @@ export class DemoRealtimeTransport implements RealtimeTransport, RealtimeMutatio
 
   get currentDemoPlayerId(): string {
     return this.demoPlayerId;
+  }
+
+  get activeSubscriptionCount(): number {
+    return this.subscriptions.size;
   }
 
   connect(): Promise<void> {
@@ -147,8 +152,16 @@ export class DemoRealtimeTransport implements RealtimeTransport, RealtimeMutatio
       return Promise.resolve();
     }
 
-    socket.close();
-    return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      this.disconnectWaiters.add(resolve);
+      socket.close();
+      if (!this.socket) this.resolveDisconnectWaiters();
+    });
+  }
+
+  async reconnect(): Promise<void> {
+    await this.disconnect();
+    await this.connect();
   }
 
   async setDemoPlayerId(playerId: string): Promise<void> {
@@ -274,6 +287,7 @@ export class DemoRealtimeTransport implements RealtimeTransport, RealtimeMutatio
     this.subscriptions.clear();
     this.socket?.close();
     this.socket = null;
+    this.resolveDisconnectWaiters();
     this.emitState(disconnectedState);
     this.connectionListeners.clear();
   }
@@ -362,6 +376,7 @@ export class DemoRealtimeTransport implements RealtimeTransport, RealtimeMutatio
   private handleClose(socket: WebSocketLike): void {
     if (socket !== this.socket) return;
     this.socket = null;
+    this.resolveDisconnectWaiters();
     this.rejectPendingMutations(createConnectionLostError('Realtime WebSocket connection lost'));
     if (this.reconnectAfterClose) {
       this.reconnectAfterClose = false;
@@ -423,6 +438,11 @@ export class DemoRealtimeTransport implements RealtimeTransport, RealtimeMutatio
     if (!this.reconnectTimer) return;
     clearTimeout(this.reconnectTimer);
     this.reconnectTimer = null;
+  }
+
+  private resolveDisconnectWaiters(): void {
+    for (const resolve of this.disconnectWaiters) resolve();
+    this.disconnectWaiters.clear();
   }
 
   private rejectPendingMutations(error: MutationError): void {
