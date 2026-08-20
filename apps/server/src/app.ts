@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
+import { protocolVersion, type DeveloperDiagnosticsData } from '@widgetforge-demo/protocol';
 import { AppDatabase } from './db/database.js';
 import { seedDatabase } from './db/seed.js';
 import { MarketService } from './domain/market/service.js';
@@ -10,10 +11,14 @@ export interface AppOptions {
   database?: AppDatabase;
   databasePath?: string;
   marketService?: MarketService;
+  environment?: string;
+  developerToolsEnabled?: boolean;
 }
 
 export async function buildApp(options: AppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({ logger: options.logger ?? false });
+  const environment = options.environment ?? process.env.NODE_ENV ?? 'development';
+  const developerToolsEnabled = options.developerToolsEnabled ?? environment !== 'production';
   const ownsDatabase = !options.database;
   const database = options.database ?? new AppDatabase(options.databasePath ?? ':memory:');
   database.migrate();
@@ -26,7 +31,7 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   });
 
   app.get('/health', async () => ({ status: 'ok' as const }));
-  registerRealtimeRoutes(app, {
+  const publicationHub = registerRealtimeRoutes(app, {
     database,
     marketService: options.marketService,
     logger: {
@@ -35,6 +40,20 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
     },
   });
 
+  if (developerToolsEnabled) {
+    app.get('/dev/diagnostics', async () => developerDiagnostics(
+      environment,
+      database,
+      publicationHub,
+    ));
+    app.post('/dev/reset', async () => {
+      database.reset();
+      seedDatabase(database);
+      publicationHub.refreshAll();
+      return developerDiagnostics(environment, database, publicationHub);
+    });
+  }
+
   if (ownsDatabase) {
     app.addHook('onClose', async () => {
       database.close();
@@ -42,4 +61,26 @@ export async function buildApp(options: AppOptions = {}): Promise<FastifyInstanc
   }
 
   return app;
+}
+
+function developerDiagnostics(
+  environment: string,
+  database: AppDatabase,
+  publicationHub: ReturnType<typeof registerRealtimeRoutes>,
+): DeveloperDiagnosticsData {
+  const publication = publicationHub.diagnostics();
+  return {
+    environment,
+    databasePath: database.filename,
+    protocolVersion,
+    connections: {
+      active: publication.connections.active,
+      entries: publication.connections.entries.map((entry) => ({ ...entry })),
+    },
+    subscriptions: {
+      total: publication.subscriptions.total,
+      byResource: publication.subscriptions.byResource.map((resource) => ({ ...resource })),
+    },
+    pendingMutations: publication.pendingMutations,
+  };
 }

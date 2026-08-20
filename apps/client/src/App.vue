@@ -8,11 +8,13 @@ import {
   forgeDarkTheme,
 } from 'widgetforge';
 import type { DemoClientRuntime } from './client-runtime';
+import DeveloperDiagnostics from './DeveloperDiagnostics.vue';
 
 const props = defineProps<DemoClientRuntime>();
 const connectionStatus = ref(props.transport.connectionState.status);
 const connectionError = ref<string | null>(props.transport.connectionState.error?.message ?? null);
 const selectedPlayerId = ref(props.transport.currentDemoPlayerId);
+const isDevelopment = import.meta.env.DEV;
 let stopObservingConnection: (() => void) | null = null;
 
 onMounted(() => {
@@ -61,6 +63,12 @@ async function changePlayer(): Promise<void> {
               </p>
             </div>
           </header>
+          <DeveloperDiagnostics
+            v-if="isDevelopment"
+            :transport="transport"
+            :data-client="dataClient"
+            :mutation-client="mutationClient"
+          />
           <section
             class="workspace-shell"
             aria-label="WidgetForge workspace"

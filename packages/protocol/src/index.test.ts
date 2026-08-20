@@ -4,6 +4,7 @@ import {
   type PlaceOrderInput,
   type ServerMessage,
   clientMessageSchema,
+  developerDiagnosticsSchema,
   parseClientMessage,
   parseServerMessage,
   protocolVersion,
@@ -11,6 +12,29 @@ import {
   serializeMessage,
   serverMessageSchema,
 } from './index.js';
+
+const developerDiagnostics = {
+  environment: 'development',
+  databasePath: 'data/widgetforge-demo.sqlite',
+  protocolVersion: 1,
+  connections: {
+    active: 1,
+    entries: [{
+      connectionId: 'connection-1',
+      demoPlayerId: 'player-a',
+      subscriptions: 2,
+      pendingMutations: 0,
+    }],
+  },
+  subscriptions: {
+    total: 2,
+    byResource: [
+      { resource: 'market.orderbook', count: 1 },
+      { resource: 'market.myOrders', count: 1 },
+    ],
+  },
+  pendingMutations: 0,
+};
 
 const sessionHello: ClientMessage = {
   type: 'session.hello',
@@ -107,6 +131,14 @@ describe('protocol schemas', () => {
   it('validates protocol version one', () => {
     expect(protocolVersionSchema.parse(protocolVersion)).toBe(1);
     expect(() => protocolVersionSchema.parse(2)).toThrow();
+  });
+
+  it('validates developer diagnostics without accepting payload fields', () => {
+    expect(developerDiagnosticsSchema.parse(developerDiagnostics)).toEqual(developerDiagnostics);
+    expect(() => developerDiagnosticsSchema.parse({
+      ...developerDiagnostics,
+      unexpectedPayload: { secret: 'never expected' },
+    })).toThrow();
   });
 
   it.each([sessionHello, resourceSubscribe, resourceUnsubscribe, placeOrder, cancelOrder])(

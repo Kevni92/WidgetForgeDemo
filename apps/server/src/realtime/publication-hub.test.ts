@@ -124,4 +124,40 @@ describe('PublicationHub', () => {
       database.close();
     }
   });
+
+  it('reports diagnostics and can refresh every active subscription', () => {
+    const { database, hub } = createHub();
+    try {
+      const messages: ServerMessage[] = [];
+      hub.addConnection('player', (message) => messages.push(message));
+      hub.setPlayer('player', 'player-a');
+      hub.subscribe('player', {
+        subscriptionId: 'book',
+        playerId: 'player-a',
+        resource: 'market.orderbook',
+        params: { marketId: 'market-1', commodityId: 'iron' },
+      });
+
+      expect(hub.diagnostics()).toEqual({
+        connections: {
+          active: 1,
+          entries: [{
+            connectionId: 'player',
+            demoPlayerId: 'player-a',
+            subscriptions: 1,
+            pendingMutations: 0,
+          }],
+        },
+        subscriptions: {
+          total: 1,
+          byResource: [{ resource: 'market.orderbook', count: 1 }],
+        },
+        pendingMutations: 0,
+      });
+      expect(hub.refreshAll()).toBe(1);
+      expect(messages).toHaveLength(2);
+    } finally {
+      database.close();
+    }
+  });
 });

@@ -271,6 +271,43 @@ export const protocolErrorMessageSchema = z
   })
   .strict();
 
+export const developerDiagnosticsSchema = z
+  .object({
+    environment: nonEmptyStringSchema,
+    databasePath: nonEmptyStringSchema,
+    protocolVersion: protocolVersionSchema,
+    connections: z
+      .object({
+        active: nonNegativeIntegerSchema,
+        entries: z.array(
+          z
+            .object({
+              connectionId: nonEmptyStringSchema,
+              demoPlayerId: nonEmptyStringSchema.optional(),
+              subscriptions: nonNegativeIntegerSchema,
+              pendingMutations: nonNegativeIntegerSchema,
+            })
+            .strict(),
+        ),
+      })
+      .strict(),
+    subscriptions: z
+      .object({
+        total: nonNegativeIntegerSchema,
+        byResource: z.array(
+          z
+            .object({
+              resource: resourceNameSchema,
+              count: nonNegativeIntegerSchema,
+            })
+            .strict(),
+        ),
+      })
+      .strict(),
+    pendingMutations: nonNegativeIntegerSchema,
+  })
+  .strict();
+
 // `type` is not unique across resource/mutation variants, so the outer union
 // delegates discrimination to the nested resource/mutation schemas.
 export const clientMessageSchema = z.union([
@@ -322,6 +359,7 @@ export type ResourceSnapshotMessage = z.infer<typeof resourceSnapshotMessageSche
 export type MutationResultMessage = z.infer<typeof mutationResultMessageSchema>;
 export type MutationErrorMessage = z.infer<typeof mutationErrorMessageSchema>;
 export type ProtocolErrorMessage = z.infer<typeof protocolErrorMessageSchema>;
+export type DeveloperDiagnosticsData = z.infer<typeof developerDiagnosticsSchema>;
 export type ServerMessage = z.infer<typeof serverMessageSchema>;
 
 export function parseClientMessage(input: unknown): ClientMessage {

@@ -4,7 +4,11 @@ import WebSocket from 'ws';
 import { buildApp } from '../app.js';
 import { AppDatabase } from '../db/database.js';
 import { seedDatabase } from '../db/seed.js';
-import { parseServerMessage, type ServerMessage } from '@widgetforge-demo/protocol';
+import {
+  developerDiagnosticsSchema,
+  parseServerMessage,
+  type ServerMessage,
+} from '@widgetforge-demo/protocol';
 
 interface RunningServer {
   app: Awaited<ReturnType<typeof buildApp>>;
@@ -200,5 +204,64 @@ describe('WebSocket protocol gateway', () => {
     running.socket.close();
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(running.app.publicationHub.connectionCount()).toBe(0);
+  });
+
+  it('reports development diagnostics and refreshes subscriptions after a demo reset', async () => {
+    running = await startServer();
+    const initialDiagnostics = developerDiagnosticsSchema.parse(
+      (await running.app.inject({ method: 'GET', url: '/dev/diagnostics' })).json(),
+    );
+    expect(initialDiagnostics).toMatchObject({
+      environment: 'test',
+      protocolVersion: 1,
+      connections: { active: 1 },
+      subscriptions: { total: 0 },
+      pendingMutations: 0,
+    });
+
+    running.database.connection
+      .prepare(
+        `INSERT INTO orders (
+          id, player_id, market_id, commodity_id, side, price_minor,
+          original_quantity, remaining_quantity, status, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run('reset-order', 'player-a', 'market-1', 'iron', 'SELL', 100, 2, 2, 'OPEN', 'now', 'now');
+    running.socket.send(
+      JSON.stringify({ type: 'session.hello', protocolVersion: 1, demoPlayerId: 'player-a' }),
+    );
+    await nextMessage(running.socket);
+    running.socket.send(JSON.stringify({
+      type: 'resource.subscribe',
+      subscriptionId: 'book',
+      resource: 'market.orderbook',
+      params: { marketId: 'market-1', commodityId: 'iron' },
+    }));
+    expect(await nextMessage(running.socket)).toMatchObject({
+      type: 'resource.snapshot',
+      data: { asks: [{ priceMinor: 100, quantity: 2 }] },
+    });
+
+    const diagnostics = developerDiagnosticsSchema.parse(
+      (await running.app.inject({ method: 'GET', url: '/dev/diagnostics' })).json(),
+    );
+    expect(diagnostics).toMatchObject({
+      connections: { active: 1 },
+      subscriptions: { total: 1, byResource: [{ resource: 'market.orderbook', count: 1 }] },
+    });
+
+    const reset = await running.app.inject({ method: 'POST', url: '/dev/reset' });
+    expect(reset.statusCode).toBe(200);
+    expect(developerDiagnosticsSchema.parse(reset.json())).toMatchObject({
+      connections: { active: 1 },
+      subscriptions: { total: 1 },
+    });
+    expect(await nextMessage(running.socket)).toMatchObject({
+      type: 'resource.snapshot',
+      data: { bids: [], asks: [] },
+    });
+    expect(
+      (running.database.connection.prepare('SELECT COUNT(*) AS count FROM orders').get() as { count: number }).count,
+    ).toBe(0);
   });
 });

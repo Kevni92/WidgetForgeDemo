@@ -351,3 +351,12 @@ protocolVersion = 1
 ```
 
 Breaking Wire-Änderungen erhöhen die Version. Additive Felder dürfen nur eingeführt werden, wenn alte Peers sie sicher ignorieren können.
+
+## Developer HTTP endpoints
+
+Die Developer-Diagnostics gehören nicht zum WebSocket-Wire-Protokoll und sind kein produktiver Market-API-Vertrag. Sie werden nur außerhalb von `NODE_ENV=production` registriert:
+
+- `GET /dev/diagnostics` liefert eine validierte, payload-freie Übersicht zu Environment, DB-Pfad, Protocol-Version, aktiven Connections, Subscriptions und Pending-Mutation-Zählern.
+- `POST /dev/reset` setzt den lokalen Market-State deterministisch über Migration plus Seed zurück und veröffentlicht danach frische `resource.snapshot`-Nachrichten an die bereits aktiven WebSocket-Subscriptions.
+
+Clients bleiben dabei verbunden; ihre bestehende Session und Subscription-IDs bleiben gültig. Der Reset ist bewusst kein `mutation.request` und wird nicht als normale Widget-Aktion über den Market-Dispatcher geroutet.
