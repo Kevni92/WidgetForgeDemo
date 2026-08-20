@@ -66,6 +66,7 @@ docs/
   ARCHITECTURE.md
   PROTOCOL.md
   ROADMAP.md
+  DECISIONS.md
 ```
 
 Die genaue Struktur wird im Bootstrap-Issue umgesetzt. `packages/domain` wird nicht vorsorglich mit Logik gefüllt; Server-Domainlogik bleibt grundsätzlich auf dem Server.
@@ -74,12 +75,18 @@ Die genaue Struktur wird im Bootstrap-Issue umgesetzt. `packages/domain` wird ni
 
 Vor der vollständigen End-to-End-Integration sollen die WidgetForge-Issues für Mutationen und Realtime-Write-Support abgeschlossen sein:
 
-- WidgetForge #180 – Mutation API und MutationClient
-- WidgetForge #181 – Vue-Integration / `useMutation`
-- WidgetForge #182 – Realtime Request/Response
-- WidgetForge #183 – stabiler npm-Consumer-Contract
+- [WidgetForge #180 – Mutation API und MutationClient](https://github.com/Kevni92/WidgetForge/issues/180)
+- [WidgetForge #181 – Vue-Integration / `useMutation`](https://github.com/Kevni92/WidgetForge/issues/181)
+- [WidgetForge #182 – Realtime Request/Response](https://github.com/Kevni92/WidgetForge/issues/182)
+- [WidgetForge #183 – stabiler npm-Consumer-Contract](https://github.com/Kevni92/WidgetForge/issues/183)
 
 Die Server-/SQLite-Arbeit dieses Repositories kann teilweise parallel vorbereitet werden. Der Client darf jedoch keine privaten Übergangs-APIs aus WidgetForge verwenden.
+
+## Umsetzung
+
+Der erste Meilenstein ist als GitHub-Issues #1–#10 geschnitten. #11 ist ein nachgelagertes Diagnostics-/Reset-Issue.
+
+Startpunkt ist [Issue #1 – Projektgrundgerüst](https://github.com/Kevni92/WidgetForgeDemo/issues/1).
 
 ## Arbeitsweise
 
@@ -93,6 +100,7 @@ Architektur und Protokoll:
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
 - [`docs/PROTOCOL.md`](./docs/PROTOCOL.md)
 - [`docs/ROADMAP.md`](./docs/ROADMAP.md)
+- [`docs/DECISIONS.md`](./docs/DECISIONS.md)
 
 ## Status
 
